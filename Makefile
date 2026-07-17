@@ -15,8 +15,8 @@ down:
 shell: ## Open a shell in the app container
 	$(APP) bash
 
-cache-clear:
+cache-clear cc:
 	$(APP) php bin/console cache:clear
 
-migrate:
+migrate mi:
 	$(APP) php bin/console doctrine:migrations:migrate --no-interaction
