@@ -21,6 +21,8 @@ RUN apt-get update \
 
 COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
+RUN useradd --uid 1000 --create-home --home-dir /home/app --shell /bin/bash app
+
 CMD ["php-fpm"]
 
 EXPOSE 9000
