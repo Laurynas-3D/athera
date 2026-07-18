@@ -29,12 +29,11 @@ services:
             APP_ENV: dev
             APP_DEBUG: "1"
             DATABASE_URL: "mysql://${DB_USER:-athera}:${DB_PASSWORD:-athera}@athera_db:3306/${DB_NAME:-athera}?serverVersion=11.4.0-MariaDB&charset=utf8mb4"
-            MESSENGER_TRANSPORT_DSN: "redis://athera_redis:6379/messages"
-            REDIS_URL: "redis://athera_redis:6379"
+            MESSENGER_TRANSPORT_DSN: "amqp://${RABBITMQ_USER:-athera}:${RABBITMQ_PASSWORD:-athera}@athera_rabbitmq:5672/%2f/messages"
         depends_on:
             athera_db:
                 condition: service_healthy
-            athera_redis:
+            athera_rabbitmq:
                 condition: service_healthy
 
     athera_db:
@@ -74,22 +73,26 @@ services:
         depends_on:
             - athera_db
 
-    athera_redis:
-        image: redis:7.4-alpine
-        container_name: athera_redis
+    athera_rabbitmq:
+        image: rabbitmq:4-management-alpine
+        container_name: athera_rabbitmq
         restart: unless-stopped
-        command: ["redis-server", "--appendonly", "yes"]
+        environment:
+            RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-athera}
+            RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-athera}
         volumes:
-            - athera_redis_data:/data
+            - athera_rabbitmq_data:/var/lib/rabbitmq
         networks:
             - athera_network
         ports:
-            - "5303:6379"
+            - "5303:5672"     # AMQP protocol
+            - "5304:15672"    # management web UI
         healthcheck:
-            test: ["CMD", "redis-cli", "ping"]
+            test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
             interval: 10s
-            timeout: 3s
+            timeout: 5s
             retries: 5
+            start_period: 20s
 
     # Messenger queue worker. Uncomment once the Symfony app exists, otherwise
     # it will crash-loop looking for bin/console.
@@ -107,13 +110,13 @@ services:
     #     environment:
     #         APP_ENV: dev
     #         DATABASE_URL: "mysql://${DB_USER:-athera}:${DB_PASSWORD:-athera}@athera_db:3306/${DB_NAME:-athera}?serverVersion=11.4.0-MariaDB&charset=utf8mb4"
-    #         MESSENGER_TRANSPORT_DSN: "redis://athera_redis:6379/messages"
+    #         MESSENGER_TRANSPORT_DSN: "amqp://${RABBITMQ_USER:-athera}:${RABBITMQ_PASSWORD:-athera}@athera_rabbitmq:5672/%2f/messages"
     #     networks:
     #         - athera_network
     #     depends_on:
     #         athera_db:
     #             condition: service_healthy
-    #         athera_redis:
+    #         athera_rabbitmq:
     #             condition: service_healthy
 
 networks:
@@ -122,4 +125,4 @@ networks:
 
 volumes:
     athera_db_data:
-    athera_redis_data:
+    athera_rabbitmq_data:

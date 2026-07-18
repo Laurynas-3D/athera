@@ -9,13 +9,14 @@ RUN apt-get update \
         libzip-dev \
         libicu-dev \
         zlib1g-dev \
+        librabbitmq-dev \
     && docker-php-ext-install -j"$(nproc)" \
         intl \
         opcache \
         pdo_mysql \
         zip \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
+    && pecl install amqp \
+    && docker-php-ext-enable amqp \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
