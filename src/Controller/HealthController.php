@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
-use Redis;
+use AMQPConnection;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,7 +12,7 @@ readonly class HealthController
 {
     public function __construct(
         private Connection                                      $db,
-        #[Autowire('%env(REDIS_URL)%')] private readonly string $redisUrl
+        #[Autowire('%env(MESSENGER_TRANSPORT_DSN)%')] private readonly string $rabbitUrl
     )
     {
     }
@@ -22,21 +22,37 @@ readonly class HealthController
     {
         return new JsonResponse([
             'success' => true,
-            'isRedisAlive' => $this->pingRedis(),
+            'isRabbitAlive' => $this->pingRedis(),
             'isDbAlive' => $this->pingDb(),
         ]);
     }
 
     private function pingRedis(): bool
     {
-        $url = parse_url($this->redisUrl);
-        $redis = new Redis();
-        $redis->connect($url['host'], $url['port'] ?? 6379, 1.0);
-        return (bool)$redis->ping();
+        try {
+            $url = parse_url($this->rabbitUrl);
+            $conn = new AMQPConnection([
+                'host'            => $url['host'],
+                'port'            => $url['port'] ?? 5672,
+                'login'           => $url['user'] ?? 'guest',
+                'password'        => $url['pass'] ?? 'guest',
+                'vhost'           => '/',
+                'connect_timeout' => 1.0,
+            ]);
+            $conn->connect();
+            return $conn->isConnected();
+        } catch (\Throwable) {
+            return false;
+        }
     }
 
     private function pingDb(): bool
     {
-        return (bool)$this->db->executeQuery('SELECT 1');
+        try {
+            $this->db->executeQuery('SELECT 1');
+            return true;
+        } catch (\Throwable $exception) {
+            return false;
+        }
     }
 }
