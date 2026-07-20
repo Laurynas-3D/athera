@@ -5,18 +5,23 @@
     "prefer-stable": true,
     "require": {
         "php": ">=8.4",
+        "ext-amqp": "*",
         "ext-ctype": "*",
         "ext-iconv": "*",
         "doctrine/doctrine-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "*",
         "doctrine/orm": "*",
+        "phpdocumentor/reflection-docblock": "^6.0",
         "symfony/console": "8.0.*",
         "symfony/dotenv": "8.0.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.0.*",
+        "symfony/property-access": "8.0.*",
+        "symfony/property-info": "8.0.*",
         "symfony/runtime": "8.0.*",
-        "symfony/yaml": "8.0.*",
-        "ext-amqp": "*"
+        "symfony/serializer": "8.0.*",
+        "symfony/validator": "8.0.*",
+        "symfony/yaml": "8.0.*"
     },
     "config": {
         "allow-plugins": {
