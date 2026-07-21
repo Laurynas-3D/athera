@@ -3,6 +3,7 @@
 namespace App\Controller\Api;
 
 use App\DTO\Payload;
+use App\Service\IngestionService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
@@ -13,11 +14,13 @@ class VehicleDataIngestController
 {
     #[Route('records', name: 'record', methods: ['POST'])]
     public function record(
-        Request $request,
         #[MapRequestPayload] Payload $payload,
+        IngestionService $ingestionService,
     ): JsonResponse
     {
-        dd($payload);
+        $validRecords = $ingestionService->ingest($payload);
+        dd($validRecords);
+        return new JsonResponse($validRecords);
     }
 }
 
