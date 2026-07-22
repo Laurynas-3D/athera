@@ -1,26 +1,33 @@
 <?php
 
 namespace App\Service;
+
 use App\DTO\IngestionResult;
 use App\DTO\Payload;
 use App\Entity\VehicleNumberPlates;
 use App\Entity\VehicleRecord;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class IngestionService
 {
     public function __construct(
-        private readonly ValidatorInterface $validator,
+        private readonly ValidatorInterface     $validator,
         private readonly EntityManagerInterface $entityManager,
-    ){}
-    public function ingest(Payload $payload): void
+        private readonly LoggerInterface        $logger,
+    )
     {
-        $validated = $this->validateRecords($payload);
-        if ($validated->isPayloadAccepted()) {
-            $this->saveRecords($payload, $validated->getAcceptedRecords());
+    }
+
+    public function ingest(Payload $payload): IngestionResult
+    {
+        $ingestionResult = $this->validateRecords($payload);
+        if ($ingestionResult->isPayloadAccepted()) {
+            $this->saveRecords($payload, $ingestionResult->getAcceptedRecords());
         }
 
+        return $ingestionResult;
     }
 
     private function saveRecords(Payload $payload, array $acceptedRecords): void
@@ -45,7 +52,6 @@ class IngestionService
             $this->entityManager->persist($newRecord);
         }
         $this->entityManager->flush();
-
     }
 
     private function validateRecords(Payload $payload): IngestionResult
@@ -77,5 +83,24 @@ class IngestionService
             return new \DateTimeImmutable()->setTimestamp((int)$timestamp);
         }
         return new \DateTimeImmutable();
+    }
+
+    public function logRejected(Payload $payload, array $rejectedRecords): void
+    {
+        $violations = [];
+        foreach ($rejectedRecords as $rejected) {
+            foreach ($rejected['violations'] as $violation) {
+                $violations[] = sprintf(
+                    '%s: %s',
+                    $violation->getPropertyPath(),
+                    $violation->getMessage()
+                );
+            }
+        }
+        $this->logger->warning('Rejected records',
+            [
+                'deviceId' => $payload->deviceId,
+                'violations' => $violations
+            ]);
     }
 }

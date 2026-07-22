@@ -5,7 +5,6 @@ namespace App\Controller\Api;
 use App\DTO\Payload;
 use App\Service\IngestionService;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
@@ -18,9 +17,17 @@ class VehicleDataIngestController
         IngestionService $ingestionService,
     ): JsonResponse
     {
-        $validRecords = $ingestionService->ingest($payload);
-        dd($validRecords);
-        return new JsonResponse($validRecords);
+        $ingestionResult = $ingestionService->ingest($payload);
+
+        if ($ingestionResult->hasErrors()){
+            $ingestionService->logRejected($payload, $ingestionResult->getRejectedRecords());
+        }
+
+        return new JsonResponse([
+            'batchAccepted' => $ingestionResult->isPayloadAccepted(),
+            'acceptedCount' => $ingestionResult->getAcceptedCount(),
+            'rejectedCount' => $ingestionResult->getRejectedCount(),
+        ]);
     }
 }
 

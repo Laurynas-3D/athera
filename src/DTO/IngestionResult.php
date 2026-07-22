@@ -39,6 +39,11 @@ class IngestionResult
     {
         return $this->accepted;
     }
+
+    public function getRejectedRecords(): array
+    {
+        return $this->rejected;
+    }
     public function getRejectedCount(): int
     {
         return count($this->rejected);
