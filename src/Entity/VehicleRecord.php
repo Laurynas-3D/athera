@@ -181,12 +181,12 @@ class VehicleRecord
         return $this;
     }
 
-    public function getRecordedAt(): \DateTimeImmutable
+    public function getRecordedAt(): DateTimeImmutable
     {
         return $this->recordedAt;
     }
 
-    public function setRecordedAt(\DateTimeImmutable $recordedAt): self
+    public function setRecordedAt(DateTimeImmutable $recordedAt): self
     {
         $this->recordedAt = $recordedAt;
         return $this;
