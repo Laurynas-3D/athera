@@ -4,17 +4,20 @@ namespace App\DTO;
 class IngestionResult
 {
     public function __construct(
-        private ?array    $accepted = [],
-        private ?array    $rejected = [],
-        private ?bool   $payloadAccepted = true,
+        private ?array $accepted = [],
+        private ?array $rejected = [],
+        private ?array $rejectedPayload = [],
+        private ?bool  $payloadAccepted = true,
     )
     {
     }
 
-    public function reject(): void
+    public function reject(mixed $violations): void
     {
         $this->payloadAccepted = false;
+        $this->rejectedPayload[] = ['violations' => $violations];
     }
+
     public function acceptRecord(Record $record): void
     {
         $this->accepted[] = $record;
@@ -28,6 +31,11 @@ class IngestionResult
     public function isPayloadAccepted(): bool
     {
         return $this->payloadAccepted;
+    }
+
+    public function isPayloadRejected(): bool
+    {
+        return $this->payloadAccepted === false;
     }
 
     public function getAcceptedCount(): int
@@ -44,6 +52,12 @@ class IngestionResult
     {
         return $this->rejected;
     }
+
+    public function getRejectedPayload(): array
+    {
+        return $this->rejectedPayload;
+    }
+
     public function getRejectedCount(): int
     {
         return count($this->rejected);

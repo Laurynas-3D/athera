@@ -22,7 +22,7 @@ class IngestionService
 
     public function ingest(Payload $payload): IngestionResult
     {
-        $ingestionResult = $this->validateRecords($payload);
+        $ingestionResult = $this->validatePayloadAndRecords($payload);
         if ($ingestionResult->isPayloadAccepted()) {
             $this->saveRecords($payload, $ingestionResult->getAcceptedRecords());
         }
@@ -54,13 +54,13 @@ class IngestionService
         $this->entityManager->flush();
     }
 
-    private function validateRecords(Payload $payload): IngestionResult
+    private function validatePayloadAndRecords(Payload $payload): IngestionResult
     {
         $result = new IngestionResult();
 
         $payloadViolations = $this->validator->validate($payload);
         if (count($payloadViolations) > 0) {
-            $result->reject();
+            $result->reject($payloadViolations);
 
             return $result;
         }
@@ -85,10 +85,10 @@ class IngestionService
         return new \DateTimeImmutable();
     }
 
-    public function logRejected(Payload $payload, array $rejectedRecords): void
+    public function logRejected(Payload $payload, array $rejectedItems): void
     {
         $violations = [];
-        foreach ($rejectedRecords as $rejected) {
+        foreach ($rejectedItems as $rejected) {
             foreach ($rejected['violations'] as $violation) {
                 $violations[] = sprintf(
                     '%s: %s',
@@ -97,7 +97,7 @@ class IngestionService
                 );
             }
         }
-        $this->logger->warning('Rejected records',
+        $this->logger->warning('Rejected',
             [
                 'deviceId' => $payload->deviceId,
                 'violations' => $violations
