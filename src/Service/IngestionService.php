@@ -25,6 +25,8 @@ class IngestionService
         $ingestionResult = $this->validatePayloadAndRecords($payload);
         if ($ingestionResult->isPayloadAccepted()) {
             $this->saveRecords($payload, $ingestionResult->getAcceptedRecords());
+            $this->saveNumberPlates($payload, $ingestionResult->getAcceptedRecords());
+            $this->entityManager->flush();
         }
 
         return $ingestionResult;
@@ -51,7 +53,39 @@ class IngestionService
 
             $this->entityManager->persist($newRecord);
         }
-        $this->entityManager->flush();
+    }
+
+    private function saveNumberPlates(Payload $payload, array $acceptedRecords): void
+    {
+        $repository = $this->entityManager->getRepository(VehicleNumberPlates::class);
+        $part1 = null;
+        $part2 = null;
+
+        foreach ($acceptedRecords as $record) {
+            $part1 ??= $record->io->vehicleRegistrationNumberPart1;
+            $part2 ??= $record->io->vehicleRegistrationNumberPart2;
+
+            if (null !== $part1 && null !== $part2) {
+                break;
+            }
+        }
+
+        $numberPlates = $repository->findOneBy([
+            'deviceId' => $payload->deviceId,
+        ]);
+
+        if (null === $numberPlates) {
+            $numberPlates = new VehicleNumberPlates();
+            $numberPlates->setDeviceId($payload->deviceId);
+        }
+        if (null !== $part1 && $numberPlates->getVehicleRegistrationNumberPart1() !== $part1) {
+            $numberPlates->setVehicleRegistrationNumberPart1($part1);
+        }
+        if (null !== $part2 && $numberPlates->getVehicleRegistrationNumberPart2() !== $part2) {
+            $numberPlates->setVehicleRegistrationNumberPart2($part2);
+        }
+
+        $this->entityManager->persist($numberPlates);
     }
 
     private function validatePayloadAndRecords(Payload $payload): IngestionResult
