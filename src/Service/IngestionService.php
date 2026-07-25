@@ -36,20 +36,18 @@ class IngestionService
     {
         foreach ($acceptedRecords as $record) {
             $newRecord = new VehicleRecord();
-            $newRecord->setDeviceId($payload->deviceId);
-            $newRecord->setLatitude($record->gnss->latitude);
-            $newRecord->setLongitude($record->gnss->longitude);
-
-            $newRecord->setAltitude($record->io->altitude);
-            $newRecord->setSpeed($record->io->speed);
-            $newRecord->setIgnition($record->io->ignition);
-            $newRecord->setMovement($record->io->movement);
-            $newRecord->setGsmSignal($record->io->gsmSignal);
-            $newRecord->setTotalOdometer($record->io->totalOdometer);
-            $newRecord->setEngineTotalFuelUsed($record->io->engineTotalFuelUsed);
-            $newRecord->setCreatedAt(new \DateTimeImmutable());
-
-            $newRecord->setRecordedAt($this->convertTimestampToDatetime($record->gnss->timestamp));
+            $newRecord->setDeviceId($payload->deviceId)
+                ->setLatitude($record->gnss->latitude)
+                ->setLongitude($record->gnss->longitude)
+                ->setAltitude($record->io->altitude)
+                ->setSpeed($record->io->speed)
+                ->setIgnition($record->io->ignition)
+                ->setMovement($record->io->movement)
+                ->setGsmSignal($record->io->gsmSignal)
+                ->setTotalOdometer($record->io->totalOdometer)
+                ->setEngineTotalFuelUsed($record->io->engineTotalFuelUsed)
+                ->setCreatedAt(new \DateTimeImmutable())
+                ->setRecordedAt($this->convertTimestampToDatetime($record->gnss->timestamp));
 
             $this->entityManager->persist($newRecord);
         }
