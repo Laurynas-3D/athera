@@ -14,7 +14,7 @@ class VehicleNumberPlates
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false, index: true)]
-    private ?string $deviceId = null;
+    private string $deviceId = '';
 
     #[ORM\Column(type: Types::STRING, length: 12, nullable: true, index: true)]
     private ?string $vehicleRegistrationNumberPart1 = null;

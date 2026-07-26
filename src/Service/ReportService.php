@@ -17,7 +17,7 @@ class ReportService
     public function __construct(
         private readonly ValidatorInterface     $validator,
         private readonly EntityManagerInterface $entityManager,
-        private readonly LoggerInterface        $logger, // TODO: implement to a log
+//        private readonly LoggerInterface        $logger, // TODO: implement to a log
     )
     {
     }
@@ -39,7 +39,7 @@ class ReportService
         $repository = $this->entityManager->getRepository(VehicleNumberPlates::class);
 
         $exploded = explode(' ', $reportRequestDto->registrationPlates);
-        $part1 = $exploded[0] ?? null;
+        $part1 = $exploded[0];
         $part2 = $exploded[1] ?? null;
 
         $numberPlates = $repository->findOneBy(

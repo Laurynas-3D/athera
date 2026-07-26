@@ -11,8 +11,8 @@ class ReportResultDto
         private ?DateTimeImmutable $fromDateTime = null,
         private ?DateTimeImmutable $toDateTime = null,
         private ?string            $registrationPlates = null,
-        private ?string            $fuelConsumed = null,
-        private ?string            $distanceTraveled = null,
+        private ?int               $fuelConsumed = null,
+        private ?int               $distanceTraveled = null,
         private bool               $resultRejected = false,
     )
     {
@@ -23,7 +23,7 @@ class ReportResultDto
         return $this->toDateTime;
     }
 
-    public function setToDateTime(?DateTimeImmutable $toDateTime): ReportResultDto
+    public function setToDateTime(?DateTimeImmutable $toDateTime): self
     {
         $this->toDateTime = $toDateTime;
         return $this;
@@ -34,7 +34,7 @@ class ReportResultDto
         return $this->fromDateTime;
     }
 
-    public function setFromDateTime(?DateTimeImmutable $fromDateTime): ReportResultDto
+    public function setFromDateTime(?DateTimeImmutable $fromDateTime): self
     {
         $this->fromDateTime = $fromDateTime;
         return $this;
@@ -55,29 +55,29 @@ class ReportResultDto
         return $this->registrationPlates;
     }
 
-    public function setRegistrationPlates(?string $registrationPlates): ReportResultDto
+    public function setRegistrationPlates(?string $registrationPlates): self
     {
         $this->registrationPlates = $registrationPlates;
         return $this;
     }
 
-    public function getFuelConsumed(): ?string
+    public function getFuelConsumed(): ?int
     {
         return $this->fuelConsumed;
     }
 
-    public function setFuelConsumed(?string $fuelConsumed): ReportResultDto
+    public function setFuelConsumed(?int $fuelConsumed): self
     {
         $this->fuelConsumed = $fuelConsumed;
         return $this;
     }
 
-    public function getDistanceTraveled(): ?string
+    public function getDistanceTraveled(): ?int
     {
         return $this->distanceTraveled;
     }
 
-    public function setDistanceTraveled(?string $distanceTraveled): ReportResultDto
+    public function setDistanceTraveled(?int $distanceTraveled): self
     {
         $this->distanceTraveled = $distanceTraveled;
         return $this;
@@ -88,7 +88,7 @@ class ReportResultDto
         return $this->resultRejected;
     }
 
-    public function setResultRejected(bool $resultRejected): ReportResultDto
+    public function setResultRejected(bool $resultRejected): self
     {
         $this->resultRejected = $resultRejected;
         return $this;

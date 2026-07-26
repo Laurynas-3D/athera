@@ -1,7 +1,7 @@
 DC := docker compose
 APP := $(DC) exec athera_app
 
-.PHONY: help up down shell cache-clear migrate
+.PHONY: help up down shell cache-clear migrate stan
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
@@ -20,3 +20,6 @@ cache-clear cc:
 
 migrate mi:
 	$(APP) php bin/console doctrine:migrations:migrate --no-interaction
+
+stan:
+	$(APP) vendor/bin/phpstan analyse --memory-limit=1G
