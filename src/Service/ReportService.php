@@ -52,8 +52,7 @@ class ReportService
             return $reportResultDto;
         }
 
-        $records = $this->entityManager->getRepository(VehicleRecord::class)->findBy(['deviceId' => $numberPlates->getDeviceId()]);
-
+        $records = $this->entityManager->getRepository(VehicleRecord::class)->findBy(['deviceId' => $numberPlates->deviceId]);
 
         $totalDistance = 0;
         $fuelConsumed = 0;

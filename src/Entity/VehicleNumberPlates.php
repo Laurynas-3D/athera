@@ -14,47 +14,38 @@ class VehicleNumberPlates
     private ?int $id = null;
 
     #[ORM\Column(type: Types::STRING, length: 128, unique: true, nullable: false, index: true)]
-    private string $deviceId = '';
+    public string $deviceId = '' {
+        get {
+            return $this->deviceId;
+        }
+        set(?string $value) {
+            $this->deviceId = $value;
+        }
+    }
 
     #[ORM\Column(type: Types::STRING, length: 12, nullable: true, index: true)]
-    private ?string $vehicleRegistrationNumberPart1 = null;
+    public ?string $vehicleRegistrationNumberPart1 = null {
+        get {
+            return $this->vehicleRegistrationNumberPart1;
+        }
+        set {
+            $this->vehicleRegistrationNumberPart1 = $value;
+        }
+    }
 
     #[ORM\Column(type: Types::STRING, length: 12, nullable: true, index: true)]
-    private ?string $vehicleRegistrationNumberPart2 = null;
-
-    public function getDeviceId(): ?string
-    {
-        return $this->deviceId;
+    public ?string $vehicleRegistrationNumberPart2 = null {
+        get {
+            return $this->vehicleRegistrationNumberPart2;
+        }
+        set {
+            $this->vehicleRegistrationNumberPart2 = $value;
+        }
     }
 
     public function getFullLicensePlateNumbers(): string
     {
         return $this->vehicleRegistrationNumberPart1 . '+' . $this->vehicleRegistrationNumberPart2;
-    }
-
-    public function setDeviceId(?string $deviceId): void
-    {
-        $this->deviceId = $deviceId;
-    }
-
-    public function getVehicleRegistrationNumberPart1(): ?string
-    {
-        return $this->vehicleRegistrationNumberPart1;
-    }
-
-    public function setVehicleRegistrationNumberPart1(?string $vehicleRegistrationNumberPart1): void
-    {
-        $this->vehicleRegistrationNumberPart1 = $vehicleRegistrationNumberPart1;
-    }
-
-    public function getVehicleRegistrationNumberPart2(): ?string
-    {
-        return $this->vehicleRegistrationNumberPart2;
-    }
-
-    public function setVehicleRegistrationNumberPart2(?string $vehicleRegistrationNumberPart2): void
-    {
-        $this->vehicleRegistrationNumberPart2 = $vehicleRegistrationNumberPart2;
     }
 
 }

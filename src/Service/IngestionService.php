@@ -74,13 +74,13 @@ class IngestionService
 
         if (null === $numberPlates) {
             $numberPlates = new VehicleNumberPlates();
-            $numberPlates->setDeviceId($payload->deviceId);
+            $numberPlates->deviceId = $payload->deviceId;
         }
-        if (null !== $part1 && $numberPlates->getVehicleRegistrationNumberPart1() !== $part1) {
-            $numberPlates->setVehicleRegistrationNumberPart1($part1);
+        if (null !== $part1 && $numberPlates->vehicleRegistrationNumberPart1 !== $part1) {
+            $numberPlates->vehicleRegistrationNumberPart1 = $part1;
         }
-        if (null !== $part2 && $numberPlates->getVehicleRegistrationNumberPart2() !== $part2) {
-            $numberPlates->setVehicleRegistrationNumberPart2($part2);
+        if (null !== $part2 && $numberPlates->vehicleRegistrationNumberPart2 !== $part2) {
+            $numberPlates->vehicleRegistrationNumberPart2 = $part2;
         }
 
         $this->entityManager->persist($numberPlates);
