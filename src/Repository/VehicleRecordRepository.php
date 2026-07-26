@@ -7,7 +7,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends VehicleRecordRepository<VehicleRecord>
+ * @extends ServiceEntityRepository<VehicleRecord>
  */
 class VehicleRecordRepository extends ServiceEntityRepository
 {
