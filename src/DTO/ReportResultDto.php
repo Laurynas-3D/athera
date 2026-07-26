@@ -94,4 +94,9 @@ class ReportResultDto
         return $this;
     }
 
+    public function isNotFound(): bool
+    {
+        return $this->registrationPlates === null;
+    }
+
 }
