@@ -2,14 +2,12 @@
 
 namespace App\Service;
 
-use App\DTO\IngestionResult;
-use App\DTO\Payload;
 use App\DTO\ReportRequestDto;
 use App\DTO\ReportResultDto;
 use App\Entity\VehicleNumberPlates;
 use App\Entity\VehicleRecord;
+use App\Repository\VehicleRecordRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ReportService
@@ -17,7 +15,7 @@ class ReportService
     public function __construct(
         private readonly ValidatorInterface     $validator,
         private readonly EntityManagerInterface $entityManager,
-//        private readonly LoggerInterface        $logger, // TODO: implement to a log
+        private readonly VehicleRecordRepository   $vehicleRecordRepository
     )
     {
     }
@@ -38,39 +36,75 @@ class ReportService
     {
         $repository = $this->entityManager->getRepository(VehicleNumberPlates::class);
 
-        $exploded = explode(' ', (string) $reportRequestDto->registrationPlates);
+        $exploded = explode(' ', (string)$reportRequestDto->registrationPlates);
         $part1 = $exploded[0];
         $part2 = $exploded[1] ?? null;
 
         $numberPlates = $repository->findOneBy(
             [
                 'vehicleRegistrationNumberPart1' => trim($part1),
-                'vehicleRegistrationNumberPart2' => trim((string) $part2),
+                'vehicleRegistrationNumberPart2' => trim((string)$part2),
             ]);
 
         if (null === $numberPlates) {
             return $reportResultDto;
         }
 
-        $records = $this->entityManager->getRepository(VehicleRecord::class)->findBy(['deviceId' => $numberPlates->deviceId]);
+        $records = $this->vehicleRecordRepository->findByDeviceInRange(
+            $numberPlates->deviceId,
+            $reportRequestDto->fromDateTime,
+            $reportRequestDto->toDateTime,
+        );
 
-        $totalDistance = 0;
-        $fuelConsumed = 0;
-        $from = $reportRequestDto->fromDateTime;
-        $to = $reportRequestDto->toDateTime;
-
-        /** @var VehicleRecord $record */
-        foreach ($records as $record) {
-            $totalDistance += (int)$record->getTotalOdometer();
-            $fuelConsumed += (int)$record->getEngineTotalFuelUsed();
-        }
-        $reportResultDto->setDistanceTraveled($totalDistance)
-            ->setFuelConsumed($fuelConsumed)
+        $reportResultDto->setDistanceTraveled($this->calculateDistance($records))
+            ->setFuelConsumed($this->calculateFuelConsumed($records))
             ->setRegistrationPlates($numberPlates->getFullLicensePlateNumbers())
-            ->setFromDateTime($from)
-            ->setToDateTime($to);
+            ->setFromDateTime($reportRequestDto->fromDateTime)
+            ->setToDateTime($reportRequestDto->toDateTime);
 
         return $reportResultDto;
+    }
+
+    /**
+     * @param array<VehicleRecord> $records
+     */
+    private function calculateDistance(array $records): int
+    {
+        if (count($records) < 2) {
+            return 0;
+        }
+
+        $min = (int)$records[0]->getTotalOdometer();
+        $max = $min;
+
+        foreach ($records as $record) {
+            $odometer = (int)$record->getTotalOdometer();
+            $min = min($min, $odometer);
+            $max = max($max, $odometer);
+        }
+
+        return $max - $min;
+    }
+
+    /**
+     * @param array<VehicleRecord> $records
+     */
+    private function calculateFuelConsumed(array $records): int
+    {
+        if (count($records) < 2) {
+            return 0;
+        }
+
+        $min = (int)$records[0]->getEngineTotalFuelUsed();
+        $max = $min;
+
+        foreach ($records as $record) {
+            $fuel = (int)$record->getEngineTotalFuelUsed();
+            $min = min($min, $fuel);
+            $max = max($max, $fuel);
+        }
+
+        return $max - $min;
     }
 
 }

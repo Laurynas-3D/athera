@@ -2,11 +2,12 @@
 
 namespace App\Entity;
 
+use App\Repository\VehicleRecordRepository;
 use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: VehicleRecordRepository::class)]
 #[ORM\Index(name: 'idx_device_time', columns: ['device_id', 'recorded_at'])]
 class VehicleRecord
 {
