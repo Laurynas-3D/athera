@@ -17,18 +17,24 @@ class VehicleRecordRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return array<VehicleRecord>
+     * @return array{minOdometer: ?string, maxOdometer: ?string, minFuel: ?string, maxFuel: ?string, recordCount: int}
      */
-    public function findByDeviceInRange(string $deviceId, \DateTimeInterface $from, \DateTimeInterface $to): array
+    public function getMetricsForDeviceInRange(string $deviceId, \DateTimeInterface $from, \DateTimeInterface $to): array
     {
         return $this->createQueryBuilder('r')
+            ->select(
+                'MIN(r.totalOdometer) AS minOdometer',
+                'MAX(r.totalOdometer) AS maxOdometer',
+                'MIN(r.engineTotalFuelUsed) AS minFuel',
+                'MAX(r.engineTotalFuelUsed) AS maxFuel',
+                'COUNT(r.id) AS recordCount',
+            )
             ->andWhere('r.deviceId = :deviceId')
             ->andWhere('r.recordedAt BETWEEN :from AND :to')
             ->setParameter('deviceId', $deviceId)
             ->setParameter('from', $from)
             ->setParameter('to', $to)
-            ->orderBy('r.recordedAt', 'ASC')
             ->getQuery()
-            ->getResult();
+            ->getSingleResult();
     }
 }

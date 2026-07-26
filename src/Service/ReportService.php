@@ -5,7 +5,6 @@ namespace App\Service;
 use App\DTO\ReportRequestDto;
 use App\DTO\ReportResultDto;
 use App\Entity\VehicleNumberPlates;
-use App\Entity\VehicleRecord;
 use App\Repository\VehicleRecordRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -50,61 +49,22 @@ class ReportService
             return $reportResultDto;
         }
 
-        $records = $this->vehicleRecordRepository->findByDeviceInRange(
+        $metrics = $this->vehicleRecordRepository->getMetricsForDeviceInRange(
             $numberPlates->deviceId,
             $reportRequestDto->fromDateTime,
             $reportRequestDto->toDateTime,
         );
 
-        $reportResultDto->setDistanceTraveled($this->calculateDistance($records))
-            ->setFuelConsumed($this->calculateFuelConsumed($records))
+        $hasDelta = (int) $metrics['recordCount'] >= 2;
+
+        $reportResultDto
+            ->setDistanceTraveled($hasDelta ? (int) $metrics['maxOdometer'] - (int) $metrics['minOdometer'] : 0)
+            ->setFuelConsumed($hasDelta ? (int) $metrics['maxFuel'] - (int) $metrics['minFuel'] : 0)
             ->setRegistrationPlates($numberPlates->getFullLicensePlateNumbers())
             ->setFromDateTime($reportRequestDto->fromDateTime)
             ->setToDateTime($reportRequestDto->toDateTime);
 
         return $reportResultDto;
-    }
-
-    /**
-     * @param array<VehicleRecord> $records
-     */
-    private function calculateDistance(array $records): int
-    {
-        if (count($records) < 2) {
-            return 0;
-        }
-
-        $min = (int)$records[0]->getTotalOdometer();
-        $max = $min;
-
-        foreach ($records as $record) {
-            $odometer = (int)$record->getTotalOdometer();
-            $min = min($min, $odometer);
-            $max = max($max, $odometer);
-        }
-
-        return $max - $min;
-    }
-
-    /**
-     * @param array<VehicleRecord> $records
-     */
-    private function calculateFuelConsumed(array $records): int
-    {
-        if (count($records) < 2) {
-            return 0;
-        }
-
-        $min = (int)$records[0]->getEngineTotalFuelUsed();
-        $max = $min;
-
-        foreach ($records as $record) {
-            $fuel = (int)$record->getEngineTotalFuelUsed();
-            $min = min($min, $fuel);
-            $max = max($max, $fuel);
-        }
-
-        return $max - $min;
     }
 
 }
