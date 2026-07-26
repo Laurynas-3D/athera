@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use Doctrine\DBAL\Connection;
@@ -12,7 +14,7 @@ readonly class HealthController
 {
     public function __construct(
         private Connection                                      $db,
-        #[Autowire('%env(MESSENGER_TRANSPORT_DSN)%')] private readonly string $rabbitUrl
+        #[Autowire('%env(MESSENGER_TRANSPORT_DSN)%')] private string $rabbitUrl
     )
     {
     }
@@ -51,7 +53,7 @@ readonly class HealthController
         try {
             $this->db->executeQuery('SELECT 1');
             return true;
-        } catch (\Throwable $exception) {
+        } catch (\Throwable) {
             return false;
         }
     }

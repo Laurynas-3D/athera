@@ -38,14 +38,14 @@ class ReportService
     {
         $repository = $this->entityManager->getRepository(VehicleNumberPlates::class);
 
-        $exploded = explode(' ', $reportRequestDto->registrationPlates);
+        $exploded = explode(' ', (string) $reportRequestDto->registrationPlates);
         $part1 = $exploded[0];
         $part2 = $exploded[1] ?? null;
 
         $numberPlates = $repository->findOneBy(
             [
                 'vehicleRegistrationNumberPart1' => trim($part1),
-                'vehicleRegistrationNumberPart2' => trim($part2),
+                'vehicleRegistrationNumberPart2' => trim((string) $part2),
             ]);
 
         if (null === $numberPlates) {

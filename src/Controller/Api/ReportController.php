@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller\Api;
 
 use App\DTO\ReportRequestDto;
@@ -11,7 +13,7 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/vehicles/', name: 'api_vehicles_')]
 class ReportController
 {
-    public function __construct(private ReportService $reportService)
+    public function __construct(private readonly ReportService $reportService)
     {
     }
 
@@ -20,7 +22,7 @@ class ReportController
         #[MapQueryString(validationGroups: ['boundary'])] ReportRequestDto $reportRequestDto,
     ): JsonResponse
     {
-        $data = $this->reportService->generateReport($reportRequestDto);
+        $this->reportService->generateReport($reportRequestDto);
         dd($reportRequestDto);
     }
 }
