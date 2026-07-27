@@ -4,10 +4,13 @@ Symfony 8 / PHP 8.4 API that ingests GNSS + AVL telemetry from Teltonika FMC650 
 
 ## Quick start
 
+From a clean clone, one command — copies `.env`, builds and starts containers, installs Composer deps, runs migrations:
+
 ```bash
-make up          # build & start containers (app on :5300, phpMyAdmin on :5302)
-make migrate     # create schema
+make fresh-start
 ```
+
+App on `:5300`, phpMyAdmin on `:5302`. Day-to-day after that: `make up` (start) / `make down` (stop).
 
 Dev tooling: `make test` (PHPUnit) · `make stan` (PHPStan) · `make rector` (dry-run).
 

@@ -1,12 +1,18 @@
 DC := docker compose
 APP := $(DC) exec athera_app
 
-.PHONY: help up down shell cache-clear migrate stan rector rector-fix test
+.PHONY: help fresh-start up down shell cache-clear migrate stan rector rector-fix test
 
 help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-14s\033[0m %s\n", $$1, $$2}'
 
-up:
+fresh-start: ## Cold start from a clean clone: env, build+start, deps, schema
+	@[ -f .env ] || cp .env.dist .env
+	$(DC) up -d --build
+	$(APP) composer install --no-interaction --prefer-dist
+	$(APP) php bin/console doctrine:migrations:migrate --no-interaction
+
+up: ## Build & start containers (deps already installed)
 	$(DC) up -d --build
 
 down:
